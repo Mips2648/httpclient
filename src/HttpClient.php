@@ -23,9 +23,9 @@ class HttpClient {
     private $host;
 
     /**
-     * @var array
+     * @var HttpHeader
      */
-    protected $headers;
+    private $httpHeaders;
 
     /**
      * @param string $host
@@ -33,8 +33,9 @@ class HttpClient {
      */
     public function __construct(string $_host, LoggerInterface $logger = null) {
         $this->host = $_host;
-        $this->headers[] = 'Content-Type: application/json; charset=utf-8';
-        $this->headers[] = 'Accept: application/json';
+        $this->httpHeaders = new HttpHeader();
+        $this->httpHeaders->setHeader('Content-Type', 'application/json; charset=utf-8');
+        $this->httpHeaders->setHeader('Accept', 'application/json');
         $this->logger = $logger ?: new NullLogger();
 
         if ($this->host[strlen($this->host) - 1] === '/') {
@@ -50,34 +51,37 @@ class HttpClient {
         return $this->logger;
     }
 
+    public function getHttpHeaders() {
+        return $this->httpHeaders;
+    }
+
     /**
      * @param string $_method must be 'GET', 'POST', 'PUT' or 'DELETE'
      * @param string $_path
      * @param array  $_data
-     * @param array  $_headers
+     * @param HttpHeader $_headers
      * @throws \InvalidArgumentException
      * @return HttpResponse
      */
-    public function executeRequest(string $_method, string $_path, array $_data = [], array $_headers = []) {
+    public function doRequest(string $_method, string $_path, array $_data = [], HttpHeader $_headers = null) {
         $method = strtoupper($_method);
 
         if (! in_array($method, array('GET', 'POST', 'PUT', 'DELETE'))) throw new InvalidArgumentException("Method not supported:{$method}");
 
+        $_headers ?: $_headers = new HttpHeader();
+
         //remove null data
         $requestData = array_filter($_data, function ($value) {
-            return $value !== null;
-        });
-        $requestHeaders = array_filter($_headers, function ($value) {
             return $value !== null;
         });
 
         $url = "{$this->host}/$_path";
 
         $countdata = count($requestData);
-        $countheaders = count($requestHeaders);
-        $this->logger->debug("preparing request {$method} {$url} nb_data:{$countdata} nb_headers:{$countheaders}");
+        $this->logger->debug("preparing request {$method} {$url} nb_data:{$countdata} nb_headers:{$_headers->count()}");
 
-        $requestHeaders = array_merge($this->headers, $requestHeaders);
+        $_headers->mergeHeaders($this->headers);
+        $this->logger->debug("headers count after merge:{$_headers->count()}");
 
         $ch = curl_init();
         if ($method === 'GET' && count($requestData)) {
@@ -90,12 +94,12 @@ class HttpClient {
             }
             $content = json_encode($requestData);
             curl_setopt($ch, CURLOPT_POSTFIELDS, $content);
-            $requestHeaders[] = 'Content-Length: ' . strlen($content);
+            $_headers->setHeader('Content-Length', strlen($content));
             unset($content);
         }
         curl_setopt($ch, CURLOPT_URL, $url);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($ch, CURLOPT_HTTPHEADER, $requestHeaders);
+        curl_setopt($ch, CURLOPT_HTTPHEADER, $_headers->getHeadersForHttp());
 
         $this->logger->debug("sending request...");
         $curlResponse = curl_exec($ch);
@@ -108,24 +112,20 @@ class HttpClient {
         return new HttpResponse($httpCode, $curlResponse, $error);
     }
 
-    public function get(string $_path, array $_data = [], array $_headers = []) {
-        return $this->executeRequest('GET', $_path, $_data, $_headers);
+    public function doGet(string $_path, array $_data = [], HttpHeader $_headers = null) {
+        return $this->doRequest('GET', $_path, $_data, $_headers);
     }
 
-    public function post(string $_path, array $_data = [], array $_headers = []) {
-        return $this->executeRequest('POST', $_path, $_data, $_headers);
+    public function doPost(string $_path, array $_data = [], HttpHeader $_headers = null) {
+        return $this->doRequest('POST', $_path, $_data, $_headers);
     }
 
-    public function put(string $_path, array $_data = [], array $_headers = []) {
-        return $this->executeRequest('PUT', $_path, $_data, $_headers);
+    public function doPut(string $_path, array $_data = [], HttpHeader $_headers = null) {
+        return $this->doRequest('PUT', $_path, $_data, $_headers);
     }
 
-    public function delete(string $_path, array $_data = [], array $_headers = []) {
-        return $this->executeRequest('DELETE', $_path, $_data, $_headers);
-    }
-
-    public function addHeader(string $_header) {
-        $this->headers[] = $_header;
+    public function doDelete(string $_path, array $_data = [], HttpHeader $_headers = null) {
+        return $this->doRequest('DELETE', $_path, $_data, $_headers);
     }
 
 }
