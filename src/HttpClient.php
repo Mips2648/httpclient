@@ -107,4 +107,24 @@ class HttpClient {
         return new HttpResponse($httpCode, $curlResponse, $error);
     }
 
+    public function get(string $_path, array $_data = [], array $_headers = []) {
+        return $this->executeRequest('GET', $_path, $_data, $_headers);
+    }
+
+    public function post(string $_path, array $_data = [], array $_headers = []) {
+        return $this->executeRequest('POST', $_path, $_data, $_headers);
+    }
+
+    public function put(string $_path, array $_data = [], array $_headers = []) {
+        return $this->executeRequest('PUT', $_path, $_data, $_headers);
+    }
+
+    public function delete(string $_path, array $_data = [], array $_headers = []) {
+        return $this->executeRequest('DELETE', $_path, $_data, $_headers);
+    }
+
+    public function addHeader(string $_header) {
+        $this->headers[] = $_header;
+    }
+
 }
