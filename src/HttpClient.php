@@ -33,7 +33,8 @@ class HttpClient {
      */
     public function __construct(string $_host, LoggerInterface $logger = null) {
         $this->host = $_host;
-        $this->headers[] = 'Content-Type: application/json';
+        $this->headers[] = 'Content-Type: application/json; charset=utf-8';
+        $this->headers[] = 'Accept: application/json';
         $this->logger = $logger ?: new NullLogger();
 
         if ($this->host[strlen($this->host) - 1] === '/') {
