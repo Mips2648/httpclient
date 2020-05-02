@@ -31,7 +31,7 @@ class HttpHeader {
     }
 
     public function mergeHeaders(HttpHeader $_headers) {
-        foreach ($_headers as $key => $value) {
+        foreach ($_headers->getIterator() as $key => $value) {
             $this->setHeader($key, $value);
         }
     }
@@ -47,5 +47,9 @@ class HttpHeader {
 
     public function count() {
         return $this->headers->count();
+    }
+
+    public function getIterator() {
+        return $this->headers->getIterator();
     }
 }
