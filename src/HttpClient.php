@@ -80,7 +80,7 @@ class HttpClient {
         $countdata = count($requestData);
         $this->logger->debug("preparing request {$method} {$url} nb_data:{$countdata} nb_headers:{$_headers->count()}");
 
-        $_headers->mergeHeaders($this->headers);
+        $_headers->mergeHeaders($this->httpHeaders);
         $this->logger->debug("headers count after merge:{$_headers->count()}");
 
         $ch = curl_init();
