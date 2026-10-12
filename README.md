@@ -100,3 +100,9 @@ Install the development dependencies and run the PHPUnit suite:
 composer install
 composer test
 ```
+
+Run PHPStan against the source code with:
+
+```sh
+composer analyse
+```
