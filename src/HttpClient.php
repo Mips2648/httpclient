@@ -2,9 +2,9 @@
 
 namespace Mips\Http;
 
-use InvalidArgumentException;
-use Psr\Log\LoggerInterface;
-use Psr\Log\NullLogger;
+use \InvalidArgumentException;
+use \Psr\Log\LoggerInterface;
+use \Psr\Log\NullLogger;
 
 /**
  * Mips HttpClient
@@ -12,32 +12,15 @@ use Psr\Log\NullLogger;
  */
 class HttpClient {
 
-    /**
-     * @var LoggerInterface
-     */
-    private $logger;
+    private LoggerInterface $logger;
 
-    /**
-     * @var string
-     */
-    private $host;
+    private string $host;
 
+    private ?string $userPwd;
 
-    /**
-     * @var string
-     */
-    private $userPwd;
+    private HttpHeader $httpHeaders;
 
-    /**
-     * @var HttpHeader
-     */
-    private $httpHeaders;
-
-    /**
-     * @param string $host
-     * @return HttpClient
-     */
-    public function __construct(string $_host, LoggerInterface $logger = null) {
+    public function __construct(string $_host, ?LoggerInterface $logger = null) {
         $this->host = $_host;
         $this->httpHeaders = new HttpHeader();
         $this->httpHeaders->setHeader('Content-Type', 'application/json; charset=utf-8');
@@ -49,7 +32,7 @@ class HttpClient {
         }
     }
 
-    public function setBasicAuth(string $username, string $password) {
+    public function setBasicAuth(string $username, string $password): void {
         if (!empty($username) && !empty($password)) {
             $this->userPwd = "{$username}:{$password}";
         } else {
@@ -57,15 +40,15 @@ class HttpClient {
         }
     }
 
-    public function setLogger(LoggerInterface $logger) {
+    public function setLogger(LoggerInterface $logger): void {
         $this->logger = $logger;
     }
 
-    public function getLogger() {
+    public function getLogger(): LoggerInterface {
         return $this->logger;
     }
 
-    public function getHttpHeaders() {
+    public function getHttpHeaders(): HttpHeader {
         return $this->httpHeaders;
     }
 
@@ -77,10 +60,12 @@ class HttpClient {
      * @throws \InvalidArgumentException
      * @return HttpResponse
      */
-    public function doRequest(string $_method, string $_path, array $_data = [], HttpHeader $_headers = null) {
+    public function doRequest(string $_method, string $_path, array $_data = [], ?HttpHeader $_headers = null): HttpResponse {
         $method = strtoupper($_method);
 
-        if (!in_array($method, array('GET', 'POST', 'PUT', 'DELETE'))) throw new InvalidArgumentException("Method not supported:{$method}");
+        if (!in_array($method, array('GET', 'POST', 'PUT', 'DELETE'))) {
+            throw new InvalidArgumentException("Method not supported:{$method}");
+        }
 
         $_headers ?: $_headers = new HttpHeader();
 
@@ -129,19 +114,19 @@ class HttpClient {
         return new HttpResponse($httpCode, $curlResponse, $error);
     }
 
-    public function doGet(string $_path, array $_data = [], HttpHeader $_headers = null) {
+    public function doGet(string $_path, array $_data = [], ?HttpHeader $_headers = null): HttpResponse {
         return $this->doRequest('GET', $_path, $_data, $_headers);
     }
 
-    public function doPost(string $_path, array $_data = [], HttpHeader $_headers = null) {
+    public function doPost(string $_path, array $_data = [], ?HttpHeader $_headers = null): HttpResponse {
         return $this->doRequest('POST', $_path, $_data, $_headers);
     }
 
-    public function doPut(string $_path, array $_data = [], HttpHeader $_headers = null) {
+    public function doPut(string $_path, array $_data = [], ?HttpHeader $_headers = null): HttpResponse {
         return $this->doRequest('PUT', $_path, $_data, $_headers);
     }
 
-    public function doDelete(string $_path, array $_data = [], HttpHeader $_headers = null) {
+    public function doDelete(string $_path, array $_data = [], ?HttpHeader $_headers = null): HttpResponse {
         return $this->doRequest('DELETE', $_path, $_data, $_headers);
     }
 }

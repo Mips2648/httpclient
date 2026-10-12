@@ -4,60 +4,29 @@ namespace Mips\Http;
 
 class HttpResponse {
 
-    /**
-     * @var int
-     */
-    private $httpStatusCode;
+    private int $httpStatusCode;
+    private string $body;
+    private string $error;
 
-    /**
-     * @var string
-     */
-    private $body;
-
-    /**
-     * @var string
-     */
-    private $error;
-
-    /**
-     * @param int $httpCode
-     * @param string $body
-     * @param string  $error
-     */
-    public function __construct($httpCode, $body, $error = '') {
+    public function __construct(int $httpCode, string $body, string $error = '') {
         $this->httpStatusCode = (int)$httpCode;
         $this->body = $body;
         $this->error = $error;
     }
 
-    /**
-     * @return string
-     */
-    public function getBody() {
+    public function getBody(): string {
         return $this->body;
     }
 
-    /**
-     * Contains the values of status codes defined for HTTP.
-     * @return int
-     */
-    public function getHttpStatusCode() {
+    public function getHttpStatusCode(): int {
         return $this->httpStatusCode;
     }
 
-    /**
-     * Get Error
-     * @return string
-     */
-    public function getError() {
+    public function getError(): string {
         return $this->error;
     }
 
-    /**
-     * Gets a value that indicates if the HTTP response was successful.
-     * @return bool
-     */
-    public function isSuccess() {
+    public function isSuccess(): bool {
         return $this->httpStatusCode >= 200 && $this->httpStatusCode < 300;
     }
 }
