@@ -1,0 +1,57 @@
+name: CI
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - master
+    paths:
+      - '**.php'
+      - composer.json
+      - composer.lock
+      - phpunit.xml
+      - .github/workflows/ci.yml
+  pull_request:
+    branches:
+      - master
+    paths:
+      - '**.php'
+      - composer.json
+      - composer.lock
+      - phpunit.xml
+      - .github/workflows/ci.yml
+
+jobs:
+  php-lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - name: PHP Syntax Checker (Lint)
+        uses: StephaneBour/actions-php-lint@8.3
+        with:
+          dir: '.'
+
+  unit-tests:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        php-version: ['8.2', '8.4']
+
+    steps:
+    - uses: actions/checkout@v7
+
+    - name: Cache Composer dependencies
+      uses: actions/cache@v6
+      with:
+        path: /tmp/composer-cache
+        key: ${{ runner.os }}-php-${{ matrix.php-version }}-${{ hashFiles('**/composer.lock') }}
+
+    - uses: php-actions/composer@v6
+      with:
+        php_version: ${{ matrix.php-version }}
+
+    - uses: php-actions/phpunit@v4
+      with:
+        php_version: ${{ matrix.php-version }}
+        configuration: 'phpunit.xml'
