@@ -2,34 +2,29 @@
 
 namespace Mips\Http;
 
-use ArrayObject;
-
 class HttpHeader {
 
-    protected ArrayObject $headers;
-
-    public function __construct() {
-        $this->headers = new ArrayObject();
-    }
+    /** @var array<string, string> */
+    protected array $headers = [];
 
     public function headerExists(string $header): bool {
-        return $this->headers->offsetExists($header);
+        return array_key_exists($header, $this->headers);
     }
 
     public function setHeader(string $header, string $value): void {
-        $this->headers->offsetSet($header, $value);
+        $this->headers[$header] = $value;
     }
 
     public function getHeader(string $header): ?string {
-        return $this->headers->offsetGet($header);
+        return $this->headers[$header] ?? null;
     }
 
     public function removeHeader(string $header): void {
-        $this->headers->offsetUnset($header);
+        unset($this->headers[$header]);
     }
 
     public function mergeHeaders(HttpHeader $_headers): void {
-        foreach ($_headers->getIterator() as $key => $value) {
+        foreach ($_headers->headers as $key => $value) {
             $this->setHeader($key, $value);
         }
     }
@@ -44,10 +39,6 @@ class HttpHeader {
     }
 
     public function count(): int {
-        return $this->headers->count();
-    }
-
-    public function getIterator(): \ArrayIterator {
-        return $this->headers->getIterator();
+        return count($this->headers);
     }
 }

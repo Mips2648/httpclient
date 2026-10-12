@@ -46,11 +46,4 @@ class HttpHeaderTest extends TestCase {
             $headers->getHeadersForHttp()
         );
     }
-
-    public function testIteratorExposesHeaderNamesAndValues(): void {
-        $headers = new HttpHeader();
-        $headers->setHeader('Accept', 'application/json');
-
-        self::assertSame(['Accept' => 'application/json'], iterator_to_array($headers->getIterator()));
-    }
 }

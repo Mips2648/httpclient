@@ -93,7 +93,7 @@ class HttpClient {
             }
             $content = json_encode($requestData);
             curl_setopt($ch, CURLOPT_POSTFIELDS, $content);
-            $_headers->setHeader('Content-Length', strlen($content));
+            $_headers->setHeader('Content-Length', (string) strlen($content));
             unset($content);
         }
         curl_setopt($ch, CURLOPT_URL, $url);
